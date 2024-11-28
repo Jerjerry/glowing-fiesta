@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, scrolledtext
 import os
 import asyncio
 import edge_tts
@@ -16,33 +16,101 @@ class StoryReader:
         self.window.title("Story Reader")
         self.window.geometry("1000x800")
         
+        # Configure window grid
+        self.window.grid_rowconfigure(1, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
+        
+        # Set theme and style
+        self.style = ttk.Style()
+        self.style.configure('TButton', font=('Segoe UI', 10))
+        self.style.configure('TLabel', font=('Segoe UI', 10))
+        
+        # Create main frame with padding
+        main_frame = ttk.Frame(self.window, padding="20")
+        main_frame.grid(row=0, column=0, sticky="nsew")
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_rowconfigure(1, weight=1)
+        
+        # Title label with custom font
+        title_label = ttk.Label(
+            main_frame, 
+            text="Story Reader", 
+            font=('Segoe UI', 16, 'bold'),
+            padding=(0, 0, 0, 10)
+        )
+        title_label.grid(row=0, column=0, sticky="n")
+        
         # Initialize audio
         pygame.mixer.init()
         self.temp_dir = tempfile.gettempdir()
         self.temp_file = os.path.join(self.temp_dir, "story_speech.mp3")
         self.chunk_size = 6000
         
-        # Story text area
-        self.text_area = tk.Text(self.window, height=35, width=100)
-        self.text_area.pack(pady=20, padx=20)
+        # Create text frame with proper padding
+        text_frame = ttk.Frame(main_frame, padding=(0, 10))
+        text_frame.grid(row=1, column=0, sticky="nsew")
+        text_frame.grid_columnconfigure(0, weight=1)
+        text_frame.grid_rowconfigure(0, weight=1)
         
-        # Read button
-        self.read_button = ttk.Button(self.window, text="Read Story", command=self.read_story)
-        self.read_button.pack(pady=10)
+        # Story text area with word wrap and scrollbar
+        self.text_area = scrolledtext.ScrolledText(
+            text_frame,
+            wrap=tk.WORD,
+            font=('Segoe UI', 11),
+            padx=10,
+            pady=10,
+            height=25,
+            width=80,
+            borderwidth=1,
+            relief="solid"
+        )
+        self.text_area.grid(row=0, column=0, sticky="nsew")
         
-        # Status label with wrapping
-        self.status = ttk.Label(self.window, text="", wraplength=700)
-        self.status.pack(pady=10)
+        # Button frame
+        button_frame = ttk.Frame(main_frame, padding=(0, 10))
+        button_frame.grid(row=2, column=0)
+        
+        # Read button with modern styling
+        self.read_button = ttk.Button(
+            button_frame,
+            text="Read Story",
+            command=self.read_story,
+            style='TButton',
+            padding=(20, 5)
+        )
+        self.read_button.grid(row=0, column=0, pady=5)
+        
+        # Status label with word wrap
+        self.status = ttk.Label(
+            main_frame,
+            text="Ready to read. Paste your story and click 'Read Story'",
+            wraplength=800,
+            justify='center',
+            style='TLabel'
+        )
+        self.status.grid(row=3, column=0, pady=10)
         
         # Voice settings
         self.voice = {
-            'voice': 'en-US-ChristopherNeural',  # Starting with Christopher
+            'voice': 'en-US-ChristopherNeural',
             'rate': '+0%',
             'volume': '+0%'
         }
         
-        # Show ready status
-        self.status.config(text="Ready to read. Paste your story and click 'Read Story'")
+        # Center window on screen
+        self.center_window()
+        
+    def center_window(self):
+        # Get screen dimensions
+        screen_width = self.window.winfo_screenwidth()
+        screen_height = self.window.winfo_screenheight()
+        
+        # Calculate position
+        x = (screen_width - 1000) // 2
+        y = (screen_height - 800) // 2
+        
+        # Set window position
+        self.window.geometry(f"1000x800+{x}+{y}")
     
     async def check_internet(self):
         try:
