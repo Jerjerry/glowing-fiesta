@@ -2,3 +2,4 @@ edge-tts==6.1.9
 pygame==2.5.2
 aiohttp==3.9.1
 asyncio==3.4.3
+cryptography==41.0.7

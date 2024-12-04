@@ -140,12 +140,28 @@ class StoryReader:
         return chunks
 
     async def generate_speech(self, text):
-        voices = [
-            'en-US-ChristopherNeural',
-            'en-US-GuyNeural',
-            'en-US-EricNeural',
-            'en-US-DavisNeural'
-        ]
+        # Check for Spanish text by looking for Spanish characters and common words
+        spanish_pattern = r'[áéíóúñ¿¡]'
+        has_spanish = bool(re.search(spanish_pattern, text))
+        
+        if has_spanish:
+            voices = [
+                'es-ES-ElviraNeural',      # Spain Spanish (female) - very clear pronunciation
+                'es-MX-BeatrizNeural',     # Mexican Spanish (female) - natural flow
+                'es-ES-AlvaroNeural',      # Spain Spanish (male) - formal and clear
+                'es-MX-JorgeNeural'        # Mexican Spanish (male) - warm tone
+            ]
+            # Standard rate for Spanish
+            self.voice['rate'] = '-3%'
+        else:
+            voices = [
+                'en-US-ChristopherNeural',
+                'en-US-GuyNeural',
+                'en-US-EricNeural',
+                'en-US-DavisNeural'
+            ]
+            # Standard rate for English
+            self.voice['rate'] = '+0%'
         
         # Try each voice until one works
         for voice in voices:
